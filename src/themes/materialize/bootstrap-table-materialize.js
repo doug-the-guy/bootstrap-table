@@ -19,7 +19,9 @@
       columns: 'view_list',
       detailOpen: 'add',
       detailClose: 'remove',
-      fullscreen: 'fullscreen'
+      fullscreen: 'fullscreen',
+      search: 'search',
+      clearSearch: 'close'
     }
   })
 

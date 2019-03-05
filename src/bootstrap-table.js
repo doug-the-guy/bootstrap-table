@@ -34,7 +34,9 @@
         columns: 'glyphicon-th icon-th',
         detailOpen: 'glyphicon-plus icon-plus',
         detailClose: 'glyphicon-minus icon-minus',
-        fullscreen: 'glyphicon-fullscreen'
+        fullscreen: 'glyphicon-fullscreen',
+        search: 'glyphicon-search',
+        clearSearch: 'glyphicon-remove'
       },
       classes: {
         buttonsPrefix: 'btn',
@@ -42,7 +44,9 @@
         buttonsGroup: 'btn-group',
         buttonsDropdown: 'btn-group',
         pull: 'pull',
-        inputGroup: '',
+        inputGroup: 'input-group',
+        inputGroupField: '',
+        inputGroupButton: 'input-group-btn',
         input: 'form-control',
         paginationDropdown: 'btn-group dropdown',
         dropup: 'dropup',
@@ -72,7 +76,9 @@
         columns: 'fa-th-list',
         detailOpen: 'fa-plus',
         detailClose: 'fa-minus',
-        fullscreen: 'fa-arrows-alt'
+        fullscreen: 'fa-arrows-alt',
+        search: 'fa-search',
+        clearSearch: 'fa-times'
       },
       classes: {
         buttonsPrefix: 'btn',
@@ -80,7 +86,9 @@
         buttonsGroup: 'btn-group',
         buttonsDropdown: 'btn-group',
         pull: 'float',
-        inputGroup: '',
+        inputGroup: 'input-group',
+        inputGroupField: '',
+        inputGroupButton: 'input-group-append',
         input: 'form-control',
         paginationDropdown: 'btn-group dropdown',
         dropup: 'dropup',
@@ -357,6 +365,8 @@
     paginationUseIntermediate: false, // Calculate intermediate pages for quick access
     search: false,
     searchOnEnterKey: false,
+    searchButton: false,
+    clearSearchButton: false,
     strictSearch: false,
     trimOnSearch: true,
     searchAlign: 'right',
@@ -523,6 +533,12 @@
     },
     formatAllRows () {
       return 'All'
+    },
+    formatSearchButton: function formatSearchButton() {
+      return 'Submit Search';
+    },
+    formatClearSearchButton: function formatClearSearchButton() {
+      return 'Clear Search';
     }
   }
 
@@ -1267,10 +1283,35 @@
 
       if (o.search) {
         html = []
-        html.push(`<div class="${this.constants.classes.pull}-${o.searchAlign} search ${this.constants.classes.inputGroup}">
-          <input class="${this.constants.classes.input}${Utils.sprintf(' input-%s', o.iconSize)}"
-          type="text" placeholder="${o.formatSearch()}">
-          </div>`)
+        let searchInput = `<input class="${this.constants.classes.input}${Utils.sprintf(' input-%s', o.iconSize)}"
+          type="text" placeholder="${o.formatSearch()}">`
+        if(o.searchButton || o.clearSearchButton){
+          html.push(`<div class="${this.constants.classes.pull}-${o.searchAlign} search">
+            <div class="${this.constants.classes.inputGroup}">
+            <div class="${this.constants.classes.inputGroupField}">${searchInput}</div>`
+
+          );
+          if(o.searchButton){
+            html.push(`<div class="${this.constants.classes.inputGroupButton}">
+             <button class="${this.constants.buttonsClass}" type="button" name="search"
+             aria-label="Search" title="${o.formatSearchButton()}">
+             ${Utils.sprintf(this.constants.html.icon, o.iconsPrefix, o.icons.search)}
+             </button></div>`)
+          }
+          if(o.clearSearchButton){
+            html.push(`<div class="${this.constants.classes.inputGroupButton}">
+             <button class="${this.constants.buttonsClass}" type="button" name="clearSearch"
+             aria-label="Clear Search" title="${o.formatClearSearchButton()}">
+             ${Utils.sprintf(this.constants.html.icon, o.iconsPrefix, o.icons.clearSearch)}
+             </button></div>`)
+          }
+          html.push(`</div></div>`)
+        } else {
+          html.push(`<div class="${this.constants.classes.pull}-${o.searchAlign} search ${this.constants.classes.inputGroup}">
+            <input class="${this.constants.classes.input}${Utils.sprintf(' input-%s', o.iconSize)}"
+            type="text" placeholder="${o.formatSearch()}">
+            </div>`)
+        }
 
         this.$toolbar.append(html.join(''))
         $search = this.$toolbar.find('.search input')
@@ -1295,6 +1336,21 @@
             timeoutId = setTimeout(() => {
               this.onSearch(event)
             }, o.searchTimeOut)
+          })
+        }
+
+        if(o.searchButton){
+          this.$toolbar.find('button[name="search"]').off('click').on('click', event => {
+            event.currentTarget = $search
+            this.onSearch(event)
+          })
+        }
+
+        if(o.clearSearchButton){
+          this.$toolbar.find('button[name="clearSearch"]').off('click').on('click', event => {
+            $search.val('')
+            event.currentTarget = $search
+            this.onSearch(event)
           })
         }
       }
